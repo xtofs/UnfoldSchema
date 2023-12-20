@@ -48,7 +48,8 @@ class Program
         logger.LogInformation("Writing paths to {path}", pathsFilePath);
         using (var file = File.CreateText(pathsFilePath))
         {
-            foreach (var path in schemaGraph.Unfold().Each(1000))
+            // foreach (var path in schemaGraph.Unfold().Each(1000))
+            foreach (var path in schemaGraph.Unfold())
             {
                 file.WriteLine("/{0}", string.Join("/", path));
             }
@@ -58,7 +59,7 @@ class Program
         Log.CloseAndFlush();
     }
 
-    private static ILogger<ModelAnalyzer> ConfigureLogger()
+    private static ILogger<Program> ConfigureLogger()
     {
         Log.Logger = new LoggerConfiguration()
             // .WriteTo.File("analyzer.log")
@@ -67,7 +68,7 @@ class Program
             .CreateLogger();
 
         var factory = new Microsoft.Extensions.Logging.LoggerFactory().AddSerilog(Log.Logger);
-        var logger = factory.CreateLogger<ModelAnalyzer>();
+        var logger = factory.CreateLogger<Program>();
         return logger;
     }
 }

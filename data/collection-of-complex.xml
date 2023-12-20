@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0"
+    xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+    <edmx:DataServices>
+        <Schema Namespace="microsoft.graph" Alias="graph"
+            xmlns="http://docs.oasis-open.org/odata/ns/edm">
+
+
+            <EntityType Name="message" BaseType="graph.outlookItem" OpenType="true">
+                <Key>
+                    <PropertyRef Name="id" />
+                </Key>
+                <Property Name="id" Type="Edm.String" Nullable="false" />
+                <Property Name="bccRecipients" Type="Collection(graph.recipient)" />
+                <Property Name="bodyPreview" Type="Edm.String" />
+
+                <Property Name="replyTo" Type="Collection(graph.recipient)" />
+            </EntityType>
+
+            <ComplexType Name="recipient">
+                <Property Name="emailAddress" Type="String" />
+            </ComplexType>
+
+            <EntityContainer Name="GraphService">
+
+                <EntitySet Name="messages" EntityType="microsoft.graph.message" />
+
+
+            </EntityContainer>
+        </Schema>
+
+    </edmx:DataServices>
+</edmx:Edmx>

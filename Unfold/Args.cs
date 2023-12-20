@@ -1,12 +1,12 @@
 class Args
 {
-    // const string DEFAULT_INPUT = "../data/example89.csdl.xml";
+    const string DEFAULT_INPUT = "../data/example89.csdl.xml";
     // const string DEFAULT_INPUT = "../data/directory.csdl.xml";
-    const string DEFAULT_INPUT = "../data/graph.csdl.xml";
+    // const string DEFAULT_INPUT = "../data/graph.csdl.xml";
 
     public string InputFile { get; private set; } = null!;
-    public bool ShowPaths { get; private set; }
-    public bool HideTree { get; private set; }
+    // public bool ShowPaths { get; private set; }
+    // public bool HideTree { get; private set; }
 
     public static Args Parse()
     {
@@ -18,14 +18,14 @@ class Args
             var arg = args[i];
             switch (arg)
             {
-                case "--paths":
-                case "-p":
-                    result.ShowPaths = true;
-                    break;
-                case "--no-tree":
-                case "-t":
-                    result.HideTree = true;
-                    break;
+                // case "--paths":
+                // case "-p":
+                //     result.ShowPaths = true;
+                //     break;
+                // case "--no-tree":
+                // case "-t":
+                //         result.HideTree = true;
+                // break;
                 case string s when s.StartsWith("--"):
                     throw new Exception($"unknown option {arg}");
                 default:
@@ -41,10 +41,7 @@ class Args
                     break;
             }
         }
-        if (result.InputFile == null)
-        {
-            result.InputFile = DEFAULT_INPUT;
-        }
+        result.InputFile ??= DEFAULT_INPUT;
         return result;
     }
 }
