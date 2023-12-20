@@ -49,7 +49,7 @@ class Program
         using (var file = File.CreateText(pathsFilePath))
         {
             // foreach (var path in schemaGraph.Unfold(logger).Each(1000))
-            foreach (var path in schemaGraph.Unfold(logger))
+            foreach (var path in schemaGraph.Unfold(logger, args.MaxKeys))
             {
                 file.WriteLine("/{0}", string.Join("/", path));
             }

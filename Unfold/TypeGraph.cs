@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Collections.Immutable;
 using Microsoft.Extensions.Logging;
 // using ILogger = Microsoft.Extensions.Logging.ILogger;
@@ -16,7 +17,7 @@ public record class Edge(string Name, string Type, bool IsMultiValued, string? K
 /// represented as a adjecency list of fully qualified type names
 /// https://en.wikipedia.org/wiki/Adjacency_list
 /// </summary>
-public record class TypeGraph(Dictionary<string, List<Edge>> AdjencencyList)
+public record class TypeGraph(FrozenDictionary<string, List<Edge>> AdjencencyList)
 {
     public const string ServiceRootNodeName = "$serviceRoot";
 
@@ -39,7 +40,7 @@ public record class TypeGraph(Dictionary<string, List<Edge>> AdjencencyList)
             }
         }
 
-        return new TypeGraph(adjacencyList);
+        return new TypeGraph(adjacencyList.ToFrozenDictionary());
     }
 
     private static void AddContainer(IEdmModel model, ILogger logger, Dictionary<string, List<Edge>> adjacencyList)
