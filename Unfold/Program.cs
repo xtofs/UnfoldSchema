@@ -1,0 +1,90 @@
+﻿
+using Microsoft.Extensions.Logging;
+using Serilog;
+using Unfold;
+
+class Program
+{
+    private static void Main()
+    {
+        var logger = ConfigureLogger();
+        var args = Args.Parse();
+
+        logger.LogInformation("Loading CSDL: {inputFile} {size}", args.InputFile, new FileInfo(args.InputFile).Length.BytesToString());
+        using var reader = XmlReader.Create(args.InputFile);
+        if (!CsdlReader.TryParse(reader, out var model, out var parseErrors))
+        {
+            foreach (var error in parseErrors)
+            {
+                logger.LogError("Error loading CSDL: {error}", error);
+            }
+            return;
+        }
+        logger.LogInformation("Finished loading CSDL: {inputFile}", args.InputFile);
+
+        // creating a graph representatoin of the structural types and their relationship
+        var schemaGraph = TypeGraph.FromModel(model, logger);
+        logger.LogInformation("Finished creating schema graph");
+        logger.LogInformation("Number of Nodes {count}", schemaGraph.NodeCount);
+        logger.LogInformation("Number of Edges {count}", schemaGraph.EdgeCount);
+
+        // check if graph is complete
+        if (schemaGraph.Validate(out var errors))
+        {
+            foreach (var error in parseErrors)
+            {
+                logger.LogWarning("Error: {error}", error);
+            }
+        }
+
+        // save the graph
+        var graphFilePath = "schema_graph.txt";
+        logger.LogInformation("Writing graph to {path}", graphFilePath);
+        schemaGraph.WriteTo(graphFilePath);
+        logger.LogInformation("Finished writing schema graph {size}", new FileInfo(graphFilePath).Length.BytesToString());
+
+        // flatten the graph into a list of paths
+        var pathsFilePath = "paths.txt";
+        logger.LogInformation("Writing paths to {path}", pathsFilePath);
+        using (var file = File.CreateText(pathsFilePath))
+        {
+            foreach (var path in schemaGraph.Unfold().Each(1000))
+            {
+                file.WriteLine("/{0}", string.Join("/", path));
+            }
+        }
+        logger.LogInformation("Finished writing paths to {path} {size}", pathsFilePath, new FileInfo(pathsFilePath).Length.BytesToString());
+
+        Log.CloseAndFlush();
+    }
+
+    private static ILogger<ModelAnalyzer> ConfigureLogger()
+    {
+        Log.Logger = new LoggerConfiguration()
+            // .WriteTo.File("analyzer.log")
+            .WriteTo.Console()
+            .MinimumLevel.Verbose()
+            .CreateLogger();
+
+        var factory = new Microsoft.Extensions.Logging.LoggerFactory().AddSerilog(Log.Logger);
+        var logger = factory.CreateLogger<ModelAnalyzer>();
+        return logger;
+    }
+}
+
+
+static class Extensions
+{
+    public static IEnumerable<T> Each<T>(this IEnumerable<T> items, int n)
+    {
+        int i = 0;
+        foreach (var item in items)
+        {
+            if (i % n == 0)
+            {
+                yield return item;
+            }
+            i += 1;
+        }
+    }
+}
