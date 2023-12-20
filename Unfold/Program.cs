@@ -38,13 +38,13 @@ class Program
 
         // save the graph
         EnsureDirectoryExists("output");
-        var graphFilePath = "output/schema_graph.txt";
+        var graphFilePath = $"output/{Path.GetFileNameWithoutExtension(args.InputFile)}_schema_graph.txt";
         logger.LogInformation("Writing graph to {path}", graphFilePath);
         schemaGraph.WriteTo(graphFilePath);
         logger.LogInformation("Finished writing schema graph {size}", new FileInfo(graphFilePath).Length.BytesToString());
 
         // flatten the graph into a list of paths
-        var pathsFilePath = "output/paths.txt";
+        var pathsFilePath = $"output/{Path.GetFileNameWithoutExtension(args.InputFile)}_paths.txt";
         logger.LogInformation("Writing paths to {path}", pathsFilePath);
         using (var file = File.CreateText(pathsFilePath))
         {

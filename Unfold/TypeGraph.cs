@@ -156,11 +156,11 @@ public record class TypeGraph(Dictionary<string, List<Edge>> AdjencencyList)
             {
                 if (edge.IsMultiValued)
                 {
-                    writer.WriteLine($"\t{edge.Name} -> {{{edge.Key}}} -> {edge.Type} ");
+                    writer.WriteLine($"\t{edge.Name} -> {{{edge.Key}}} -> [{edge.Type}] ");
                 }
                 else
                 {
-                    writer.WriteLine($"\t{edge.Name} -> {edge.Type} ");
+                    writer.WriteLine($"\t{edge.Name} -> [{edge.Type}] ");
                 }
             }
         }
