@@ -1,5 +1,4 @@
-﻿
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Serilog;
 using Unfold;
 
@@ -38,18 +37,19 @@ class Program
         }
 
         // save the graph
-        var graphFilePath = "schema_graph.txt";
+        EnsureDirectoryExists("output");
+        var graphFilePath = "output/schema_graph.txt";
         logger.LogInformation("Writing graph to {path}", graphFilePath);
         schemaGraph.WriteTo(graphFilePath);
         logger.LogInformation("Finished writing schema graph {size}", new FileInfo(graphFilePath).Length.BytesToString());
 
         // flatten the graph into a list of paths
-        var pathsFilePath = "paths.txt";
+        var pathsFilePath = "output/paths.txt";
         logger.LogInformation("Writing paths to {path}", pathsFilePath);
         using (var file = File.CreateText(pathsFilePath))
         {
-            // foreach (var path in schemaGraph.Unfold().Each(1000))
-            foreach (var path in schemaGraph.Unfold())
+            // foreach (var path in schemaGraph.Unfold(logger).Each(1000))
+            foreach (var path in schemaGraph.Unfold(logger))
             {
                 file.WriteLine("/{0}", string.Join("/", path));
             }
@@ -58,6 +58,7 @@ class Program
 
         Log.CloseAndFlush();
     }
+
 
     private static ILogger<Program> ConfigureLogger()
     {
@@ -71,21 +72,12 @@ class Program
         var logger = factory.CreateLogger<Program>();
         return logger;
     }
-}
 
-
-static class Extensions
-{
-    public static IEnumerable<T> Each<T>(this IEnumerable<T> items, int n)
+    public static void EnsureDirectoryExists(string path)
     {
-        int i = 0;
-        foreach (var item in items)
+        if (!Directory.Exists(path))
         {
-            if (i % n == 0)
-            {
-                yield return item;
-            }
-            i += 1;
+            Directory.CreateDirectory(path);
         }
     }
 }

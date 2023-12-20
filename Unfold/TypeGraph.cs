@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using Microsoft.Extensions.Logging;
-using Serilog;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
+// using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Unfold;
 
@@ -167,11 +166,15 @@ public record class TypeGraph(Dictionary<string, List<Edge>> AdjencencyList)
         }
     }
 
-    internal IEnumerable<ImmutableList<string>> Unfold()
+    public IEnumerable<ImmutableList<string>> Unfold(ILogger logger, int depth = 3)
     {
+        if (depth <= 0)
+        {
+            yield break;
+        }
         foreach (var edge in this.AdjencencyList[ServiceRootNodeName])
         {
-            Log.Logger.Information("processing {containerElementName}", edge.Name);
+            logger.LogInformation("processing {containerElementName}", edge.Name);
             var path = ImmutableList.Create(edge.Name);
             yield return path;
             if (edge.IsMultiValued)
@@ -179,15 +182,19 @@ public record class TypeGraph(Dictionary<string, List<Edge>> AdjencencyList)
                 path = path.Add($"{{{edge.Key}}}");
                 yield return path;
             }
-            foreach (var successor in Unfold(edge.Type, path, ImmutableHashSet.Create(edge.Type)))
+            foreach (var successor in Unfold(edge.Type, path, ImmutableHashSet.Create(edge.Type), depth))
             {
                 yield return successor;
             }
         }
     }
 
-    internal IEnumerable<ImmutableList<string>> Unfold(string type, ImmutableList<string> prefix, ImmutableHashSet<string> visited)
+    internal IEnumerable<ImmutableList<string>> Unfold(string type, ImmutableList<string> prefix, ImmutableHashSet<string> visited, int depth)
     {
+        if (depth <= 0)
+        {
+            yield break;
+        }
         foreach (var edge in this.AdjencencyList[type])
         {
             var path = prefix.Add(edge.Name);
@@ -195,11 +202,12 @@ public record class TypeGraph(Dictionary<string, List<Edge>> AdjencencyList)
             if (edge.IsMultiValued)
             {
                 path = path.Add($"{{{edge.Key}}}");
+                depth -= 1;
                 yield return path;
             }
             if (!visited.Contains(edge.Type))
             {
-                foreach (var x in Unfold(edge.Type, path, visited.Add(edge.Type)))
+                foreach (var x in Unfold(edge.Type, path, visited.Add(edge.Type), depth))
                 {
                     yield return x;
                 }

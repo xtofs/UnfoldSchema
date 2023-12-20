@@ -15,14 +15,4 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="5.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="example89.csdl.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\SchemaAnalyzer\SchemaAnalyzer.csproj" />
-  </ItemGroup>
-
 </Project>
